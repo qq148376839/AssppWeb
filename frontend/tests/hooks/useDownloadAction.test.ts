@@ -1,5 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getDownloadInfo } from "../../src/apple/download";
+import { apiGet, apiPost } from "../../src/api/client";
 import { useDownloadAction } from "../../src/hooks/useDownloadAction";
 import type { Account, Software } from "../../src/types";
 
@@ -111,6 +113,41 @@ describe("useDownloadAction", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(apiGet).mockResolvedValue({ maxDownloadMB: 0 });
+    vi.mocked(apiPost).mockResolvedValue({});
+  });
+
+  it("keeps the build version when creating a download task", async () => {
+    vi.mocked(getDownloadInfo).mockResolvedValueOnce({
+      output: {
+        downloadURL: "https://cdn.example.com/app.ipa",
+        sinfs: [{ id: 1, sinf: "base64-sinf" }],
+        bundleShortVersionString: "1.2.3",
+        bundleVersion: "456",
+        iTunesMetadata: "base64-metadata",
+      },
+      updatedCookies: renewedAccount.cookies,
+    });
+
+    const { result } = renderHook(() => useDownloadAction());
+
+    await result.current.startDownload(account, app);
+
+    expect(apiPost).toHaveBeenCalledWith("/api/downloads", {
+      software: {
+        ...app,
+        version: "1.2.3",
+        bundleVersion: "456",
+      },
+      accountHash: expect.any(String),
+      downloadURL: "https://cdn.example.com/app.ipa",
+      sinfs: [{ id: 1, sinf: "base64-sinf" }],
+      iTunesMetadata: "base64-metadata",
+    });
+    expect(mocks.updateCookies).toHaveBeenCalledWith(
+      account.email,
+      renewedAccount.cookies,
+    );
   });
 
   it("reauthenticates and retries license acquisition once when the token expired", async () => {

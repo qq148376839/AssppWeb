@@ -6,6 +6,8 @@ export function buildManifest(
   displayImageSmallUrl: string,
   displayImageLargeUrl: string,
 ): string {
+  const bundleVersion = software.bundleVersion || software.version;
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -39,7 +41,7 @@ export function buildManifest(
                 <key>bundle-identifier</key>
                 <string>${escapeXml(software.bundleID)}</string>
                 <key>bundle-version</key>
-                <string>${escapeXml(software.version)}</string>
+                <string>${escapeXml(bundleVersion)}</string>
                 <key>kind</key>
                 <string>software</string>
                 <key>title</key>

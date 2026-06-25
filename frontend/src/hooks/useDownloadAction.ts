@@ -69,7 +69,11 @@ export function useDownloadAction() {
     const hash = await accountHash(account);
 
     await apiPost('/api/downloads', {
-      software: { ...app, version: output.bundleShortVersionString },
+      software: {
+        ...app,
+        version: output.bundleShortVersionString,
+        bundleVersion: output.bundleVersion,
+      },
       accountHash: hash,
       downloadURL: output.downloadURL,
       sinfs: output.sinfs,

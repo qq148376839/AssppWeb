@@ -7,6 +7,7 @@ const mockSoftware: Software = {
   bundleID: "com.example.testapp",
   name: "Test App",
   version: "1.0.0",
+  bundleVersion: "100.0.1",
   artistName: "Test Developer",
   sellerName: "Test Developer Inc.",
   description: "A test application",
@@ -77,11 +78,26 @@ describe("manifestBuilder", () => {
       expect(manifest).toContain("<key>bundle-identifier</key>");
       expect(manifest).toContain("<string>com.example.testapp</string>");
       expect(manifest).toContain("<key>bundle-version</key>");
-      expect(manifest).toContain("<string>1.0.0</string>");
+      expect(manifest).toContain("<string>100.0.1</string>");
       expect(manifest).toContain("<key>kind</key>");
       expect(manifest).toContain("<string>software</string>");
       expect(manifest).toContain("<key>title</key>");
       expect(manifest).toContain("<string>Test App</string>");
+    });
+
+    it("should fall back to display version when build version is absent", () => {
+      const { bundleVersion, ...softwareWithoutBuildVersion } = mockSoftware;
+
+      const manifest = buildManifest(
+        softwareWithoutBuildVersion,
+        "https://example.com/payload.ipa",
+        "https://example.com/small.png",
+        "https://example.com/large.png",
+      );
+
+      expect(bundleVersion).toBe("100.0.1");
+      expect(manifest).toContain("<key>bundle-version</key>");
+      expect(manifest).toContain("<string>1.0.0</string>");
     });
 
     it("should XML-escape special characters", () => {

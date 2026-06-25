@@ -3,6 +3,7 @@ export interface Software {
   bundleID: string;
   name: string;
   version: string;
+  bundleVersion?: string;
   price?: number;
   artistName: string;
   sellerName: string;
